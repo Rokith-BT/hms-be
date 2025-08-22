@@ -1,0 +1,30 @@
+export class HumanResourcePayroll {
+  id: number;
+  staff_id: number;
+  basic: any;
+  total_allowance: any;
+  total_deduction: any;
+  leave_deduction: number;
+  tax: any;
+  net_salary: any;
+  status: string;
+  month: string;
+  year: string;
+  cheque_no: string;
+  cheque_date: Date;
+  attachment: string;
+  attachment_name: string;
+  payment_mode: string;
+  payment_date: Date;
+  remark: string;
+  generated_by: number;
+  created_at: Date;
+  hospital_id: number;
+  hos_staff_payslip_id: number;
+  staff_payslip_id: number;
+  allowance_type: string;
+  amount: any;
+  cal_type: string;
+  hos_payslip_allowance_id: number;
+  staff_payslip_allowance: any;
+}

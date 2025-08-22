@@ -1,0 +1,44 @@
+import { Timestamp } from "typeorm";
+
+export class EmrAddNewPatient {
+    id:number;
+    lang_id:number;
+    patient_name:string;
+    dob:Date;
+    age:number;
+    month:number;
+    day:number;
+    image:string;
+    mobileno:string; 
+    email:string;
+    gender:string;
+    marital_status:string;
+    blood_group:string;
+    blood_bank_product_id:number;
+    address:Text;
+    guardian_name:string;
+    patient_type:string;
+    ABHA_number:string;
+    known_allergies:string;
+    note:string;
+    is_ipd:string;
+    app_key:string;
+    insurance_id:string;
+    insurance_validity:Date;
+    is_dead:string;
+    is_active:string;
+    disable_at:Date;
+    created_at:Timestamp;
+    pincode:string;
+    state_code:number;
+    district_code:number;
+    emergency_mobile_no:Number;
+    dial_code:string;
+    salutation:string;
+    emergency_dial_code:string;
+    state_name:string;
+    district_name:string;
+    aayush_unique_id:string;
+    abha_address:string;
+    is_confirmed_to_create_new_patient:boolean
+}

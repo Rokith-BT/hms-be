@@ -1,0 +1,23 @@
+export class SettingsFrontCmsSetting {
+    id:number;
+    theme:string;
+    is_active_rtl:number;
+    is_active_front_cms:number;
+    is_active_online_appointment:number;
+    is_active_sidebar:number;
+    logo:string;
+    contact_us_email:string;
+    complain_form_email:string;
+    sidebar_options:Text;
+    fb_url:string;
+    twitter_url:string;
+    youtube_url:string;
+    google_plus:string;
+    instagram_url:string;
+    pinterest_url:string;
+    linkedin_url:string;
+    google_analytics:Text;
+    footer_text:string;
+    fav_icon:string;
+    created_at:Date;
+}

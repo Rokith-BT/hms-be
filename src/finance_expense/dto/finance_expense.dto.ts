@@ -1,0 +1,54 @@
+import { ApiProperty } from '@nestjs/swagger';
+
+export class FinanceExpenseDto {
+  @ApiProperty({ example: 1 })
+  id: number;
+
+  @ApiProperty({ example: 1 })
+  exp_head_id: number;
+
+  @ApiProperty({ example: 'Expense1' })
+  name: string;
+
+  @ApiProperty({ example: 'EXP001' })
+  invoice_no: string;
+
+  @ApiProperty({ example: '2025-04-29' })
+  date: Date;
+
+  @ApiProperty({ example: '100.00' })
+  amount: any;
+
+  @ApiProperty({ example: 'new' })
+  note: string;
+
+  @ApiProperty({ example: 'no' })
+  is_deleted: string;
+
+  @ApiProperty({ example: 'new.pdf' })
+  documents: string;
+
+  @ApiProperty({ example: 1 })
+  generated_by: number;
+
+  @ApiProperty({ example: 'yes' })
+  is_active: string;
+
+  @ApiProperty({ example: '2025-04-29' })
+  created_at: Date;
+
+  @ApiProperty({ example: 1 })
+  hos_expenses_id: number;
+
+  @ApiProperty({ example: 1 })
+  hospital_id: number;
+
+}
+
+export class CountDto {
+  @ApiProperty({ example: '10' })
+  details: FinanceExpenseDto[];
+
+  @ApiProperty({ example: '10' })
+  total: number;
+}
