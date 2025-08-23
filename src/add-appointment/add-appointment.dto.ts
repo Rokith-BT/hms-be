@@ -1,9 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
- 
-export class appointment1 {
- 
-    @ApiProperty({ example: '3' })
-    appointment_status_id: any;
+
  
     @ApiProperty({ example: '36' })
     patient_id: number;
