@@ -17,26 +17,10 @@ export class AmbulanceListService {
     try {
       const addAmbulanceList = await this.connection.query(
         `INSERT into vehicles(
-       vehicle_no,
-       vehicle_model,
-       manufacture_year,
-       driver_name,
-       driver_licence,
-       driver_contact,
-       note,
-       vehicle_type
-        ) VALUES (?,?,?,?,?,?,?,?)`,
-        [
-          createAmbulanceList.vehicle_no,
-          createAmbulanceList.vehicle_model,
-          createAmbulanceList.manufacture_year,
-          createAmbulanceList.driver_name,
-          createAmbulanceList.driver_licence,
+     
           createAmbulanceList.driver_contact,
           createAmbulanceList.note,
           createAmbulanceList.vehicle_type
-        ],
-      )
 
       const addAmbulanceListID = addAmbulanceList.insertId;
       await this.dynamicConnection.query(
