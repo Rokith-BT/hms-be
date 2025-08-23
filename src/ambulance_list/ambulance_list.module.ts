@@ -7,4 +7,4 @@ import { DynamicDatabaseService } from 'src/dynamic_db.service';
   controllers: [AmbulanceListController],
   providers: [AmbulanceListService,DynamicDatabaseService],
 })
-export class AmbulanceListModule {}
+
