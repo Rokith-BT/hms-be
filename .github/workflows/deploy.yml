@@ -5,17 +5,42 @@ on:
        - master
 
 jobs:
-  build-and-deploy:
-    # runs-on: [self-hosted, windows, test]
+   Docker-image:
     runs-on: ubuntu-latest
-
+ 
+ 
     steps:
-      - name: Checkout Code
+      - name: Checkout source
         uses: actions/checkout@v4
+ 
+      - name: Configure AWS Credentials
+        
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v5
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+ 
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+ 
+      - name: Set short SHA
+        id: vars
+        run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+ 
+ 
+      - name: Build, Tag, and Push Docker image
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: hms-be
+          IMAGE_TAG:  ${{ github.ref_name }}-${{ env.SHORT_SHA }}
+          
+        run: |
+          docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
+          docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+ 
+          # push latest tag
+          docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
