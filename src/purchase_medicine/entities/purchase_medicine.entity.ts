@@ -1,0 +1,37 @@
+export class PurchaseMedicine {
+  id: number;
+  invoice_no: string;
+  date: Date;
+  supplier_id: number;
+  file: string;
+  total: any;
+  discount: any;
+  net_amount: any;
+  note: string;
+  payment_mode: string;
+  cheque_no: string;
+  cheque_date: Date;
+  payment_date: Date;
+  received_by: number;
+  attachment: string;
+  attachment_name: string;
+  payment_note: string;
+  supplier_bill_basic_id: number;
+  pharmacy_id: number;
+  inward_date: Date;
+  expiry: Date;
+  batch_no: string;
+  packing_qty: string;
+  purchase_rate_packing: string;
+  quantity: string;
+  mrp: any;
+  purchase_price: any;
+  tax: any;
+  sale_rate: any;
+  batch_amount: any;
+  amount: any;
+  available_quantity: number;
+  hospital_id: number;
+  hos_medicine_batch_details_id: number;
+  hos_supplier_bill_basic_id: number;
+}

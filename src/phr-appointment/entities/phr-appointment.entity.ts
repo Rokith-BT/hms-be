@@ -1,0 +1,33 @@
+export class PhrAppointment {
+    id?: number;
+    patient_id?: number;
+    case_reference_id?: number;
+    visit_details_id?: number;
+    date?: any;
+    time?: string;
+    priority?: number;
+    specialist?: number;
+    doctor?: number;
+    message?: string;
+    amount?: string;
+    appointment_status?: string;
+    source?: string;
+    is_opd?: string;
+    payment_mode?: string;
+    payment_date?: string;
+    is_ipd?: string;
+    global_shift_id?: number;
+    shift_id?: number;
+    is_queue?: number;
+    live_consult?: string;
+    Hospital_id?: number;
+    hos_appointment_id?: number;
+    txn_id?: string;
+    pg_ref_id?: string;
+    bank_ref_id?: string;
+    appointment_cancellation_reason?: string;
+    payment_gateway?: string
+    payment_id?: string
+    payment_reference_number?: string
+    received_by_name?: string
+}

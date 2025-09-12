@@ -1,0 +1,106 @@
+name: HMS BACKEND CI/CD Deployment
+
+on:
+  push:
+    branches:
+      - localDev
+      - cloudDev
+      - test
+      - uat
+      - demo
+      - prod
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, hms-be-localDev-runner]
+
+    steps:
+      # Step 1: Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set environment-specific deployment configurations
+      - name: Set environment variables
+        id: set_vars
+        run: |
+
+          if [[ "$GITHUB_REF" == "refs/heads/localDev" ]]; then
+            export DEPLOYMENT_TARGET="local"
+            echo "Deploying to local server"
+          elif [[ "$GITHUB_REF" == "refs/heads/cloudDev" ]]; then
+            export DEPLOYMENT_TARGET="cloud"
+            export GROUP_NAME="cloudDev-group"
+            echo "Deploying to AWS (DEV environment)"
+          elif [[ "$GITHUB_REF" == "refs/heads/test" ]]; then
+            export DEPLOYMENT_TARGET="cloud"
+            export GROUP_NAME="test-group"
+            echo "Deploying to AWS (Test environment)"
+          elif [[ "$GITHUB_REF" == "refs/heads/uat" ]]; then
+            export DEPLOYMENT_TARGET="cloud"
+            export GROUP_NAME="uat-group"
+            echo "Deploying to AWS (UAT environment)"
+          elif [[ "$GITHUB_REF" == "refs/heads/demo" ]]; then
+            export DEPLOYMENT_TARGET="cloud"
+            export GROUP_NAME="demo-group"
+            echo "Deploying to AWS (DEMO environment)"
+          elif [[ "$GITHUB_REF" == "refs/heads/prod" ]]; then
+            export DEPLOYMENT_TARGET="cloud"
+            export GROUP_NAME="prod-group"
+            echo "Deploying to AWS (Production environment)"
+          else
+            echo "No matching environment for branch $GITHUB_REF"
+            exit 1
+          fi
+
+          echo "target=$DEPLOYMENT_TARGET" >> $GITHUB_ENV
+          echo "group=$GROUP_NAME" >> $GITHUB_ENV
+
+      # Step 3: Deploy to Local Server (only for local-dev branch)
+      - name: Deploy to Local Server
+        if: env.target == 'local'
+        run: |
+
+
+
+          # Clean up and deploy the new build
+          sudo rm -rf /var/www/hms-backend/*
+
+          echo "Cleaned previous build"
+          sudo cp -r $GITHUB_WORKSPACE/* /var/www/hms-backend/          
+
+          echo "Starting NPM Install..."
+          cd /var/www/hms-backend/
+          sudo npm install || { echo "npm install failed"; exit 1; }
+          echo "NPM install completed successfully"
+
+
+          sudo cp ~/env/.env.hms-be /var/www/hms-backend/.env
+          echo "Copied .env file"
+
+          # Run the build process
+          sudo npm run build || { echo "Build failed"; exit 1; }
+          echo "Build completed successfully"
+
+
+          #cd /var/www/hms-backend/
+          sudo pm2 restart HMS-BE
+
+      # Step 4: Deploy to AWS CodeDeploy
+      - name: Configure AWS Credentials
+        if: env.target == 'cloud'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+
+      - name: Create CodeDeploy Deployment
+        if: env.target == 'cloud'
+        run: |
+          echo "Deploying to AWS CodeDeploy (Application: PHP-demo, Group: ${{ env.group }})"
+          aws deploy create-deployment \
+             --application-name HMS-BE \
+             --deployment-group-name ${{ env.group }} \
+             --deployment-config-name CodeDeployDefault.AllAtOnce \
+             --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
+           echo "AWS CodeDeploy deployment complete."

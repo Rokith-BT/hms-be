@@ -1,0 +1,21 @@
+name: CI/CD deployment
+ 
+on:
+  push:
+    branches:
+ 
+      - dev  # Run when pushed to the 'dev' branch
+ 
+jobs:
+  deploy:
+    runs-on: [self-hosted, ophub-backend-dev-runner]  # Specify to run on a self-hosted runner
+ 
+    steps:
+      - name: Run Deployment Commands
+        run: |
+          cd /var/www/op-hub-backend
+          sudo git stash
+          sudo git pull
+          sudo npm install
+ 
+          sudo pm2 restart 0

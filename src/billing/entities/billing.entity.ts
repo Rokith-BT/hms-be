@@ -1,0 +1,24 @@
+export class Billing {
+    id:number;
+    ipd_id:number;
+    opd_id:number;
+    date:Date;
+    qty:number;
+    charge_id:number;
+    standard_charge:number;
+    tpa_charge:number;
+    tax:number;
+    apply_charge:number;
+    amount:number;
+    note:Text;
+    patient_id:any;
+    created_at:Date;
+    Hospital_id:number;
+    hos_patient_charges_id:number;
+    payment_status:string;
+    txn_id:any;
+    pg_ref_id:any;
+    bank_ref_id:any;
+    payment_mode:any;
+    payment_date:any;
+}

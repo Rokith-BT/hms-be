@@ -1,0 +1,18 @@
+#!/bin/bash
+
+cd /var/www/hms-backend/
+cp /home/ubuntu/env/.env.hms-be .env
+
+npm ci
+echo 'npm package installation'
+
+npm run build
+
+# # Restart or start the PM2 service
+if pm2 describe HMS-BE > /dev/null; then
+    echo "Restarting existing PM2 process: HMS-BE"
+    pm2 restart HMS-BE
+else
+    echo "Starting new PM2 process: HMS-BE"
+    pm2 start dist/main.js --name HMS-BE
+fi
