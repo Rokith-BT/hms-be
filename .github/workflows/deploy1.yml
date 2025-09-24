@@ -40,6 +40,9 @@ jobs:
 
           echo "target=$DEPLOYMENT_TARGET" >> $GITHUB_ENV
           echo "group=$GROUP_NAME" >> $GITHUB_ENV
+          BRANCH_NAME=${GITHUB_REF##*/}
+          echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
+          echo "BRANCH_NAME=${BRANCH_NAME}"
 
       # Step 3: Deploy to Local Server (only for local-dev branch)
       - name: Deploy to Local Server

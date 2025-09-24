@@ -1,26 +1,30 @@
 #!/bin/bash
 
-cd /var/www/phr-backend/
-cp /home/ubuntu/env/.env.hms .env
+# Fetch the branch name passed from GitHub Actions (this should be passed during deployment)
+BRANCH_NAME=${BRANCH_NAME:-"undefined"}
 
-# Extract the branch name from GITHUB_REF
-BRANCH_NAME=${GITHUB_REF##*/}
+echo "Branch Name from GitHub Actions: $BRANCH_NAME"
 
-echo "GITHUB_REF: $GITHUB_REF"
-echo "Branch Name: $BRANCH_NAME"
+cd /var/www/hms-backend/
 
+# Check if the branch is 'docker-complete'
 if [ "$BRANCH_NAME" == "docker-complete" ]; then
-    # If branch is 'cloudev', use Docker Compose
-    docker-compose up --build -d
+    echo "Deploying using Docker Compose for docker-complete branch"
+    docker-compose down -v  # Clean up any existing containers/volumes
+    docker-compose up --build -d  # Build and start Docker containers
 else
-    # For all other branches, run npm install and build
-    npm ci
-    echo 'npm package installation'
+    echo "Running normal deployment for branch $BRANCH_NAME"
 
-    npm run build
-    echo 'npm build complete'
+    # Clean up previous build and deploy new one
+    sudo rm -rf /var/www/hms-backend/*
+    sudo cp -r /home/ubuntu/hms-backend/* /var/www/hms-backend/
 
-    # Handle PM2 process management
+    # Run npm install and build for non-Docker branches
+    cd /var/www/hms-backend/
+    sudo npm install || { echo "npm install failed"; exit 1; }
+    sudo npm run build || { echo "npm build failed"; exit 1; }
+
+    # Restart or start PM2 process
     if pm2 describe HMS-BE > /dev/null; then
         echo "Restarting existing PM2 process: HMS-BE"
         pm2 restart HMS-BE
@@ -29,3 +33,4 @@ else
         pm2 start dist/main.js --name HMS-BE
     fi
 fi
+
