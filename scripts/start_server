@@ -6,6 +6,8 @@ cp /home/ubuntu/env/.env.hms .env
 # Extract the branch name from GITHUB_REF
 BRANCH_NAME=${GITHUB_REF##*/}
 
+echo $BRANCH_NAME
+
 if [ "$BRANCH_NAME" == "docker-complete" ]; then
     # If branch is 'cloudev', use Docker Compose
     docker-compose up --build -d
