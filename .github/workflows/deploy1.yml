@@ -100,7 +100,8 @@ jobs:
              --application-name TRANS-demo \
              --deployment-group-name ${{ env.group }} \
              --deployment-config-name CodeDeployDefault.AllAtOnce \
-             --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
+             --github-location repository=${{ github.repository }},commitId=${{ github.sha }} \
+            --environment-variables BRANCH_NAME=$BRANCH_NAME
            echo "AWS CodeDeploy deployment complete."
   # Docker-image:
   #   needs: deploy
