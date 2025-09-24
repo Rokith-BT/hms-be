@@ -1,18 +1,28 @@
 #!/bin/bash
 
-cd /var/www/hms-backend/
-cp /home/ubuntu/env/.env.hms-be .env
+cd /var/www/phr-backend/
+cp /home/ubuntu/env/.env.hms .env
 
-npm ci
-echo 'npm package installation'
+# Extract the branch name from GITHUB_REF
+BRANCH_NAME=${GITHUB_REF##*/}
 
-npm run build
-
-# # Restart or start the PM2 service
-if pm2 describe HMS-BE > /dev/null; then
-    echo "Restarting existing PM2 process: HMS-BE"
-    pm2 restart HMS-BE
+if [ "$BRANCH_NAME" == "cloudev" ]; then
+    # If branch is 'cloudev', use Docker Compose
+    docker-compose up --build -d
 else
-    echo "Starting new PM2 process: HMS-BE"
-    pm2 start dist/main.js --name HMS-BE
+    # For all other branches, run npm install and build
+    npm ci
+    echo 'npm package installation'
+
+    npm run build
+    echo 'npm build complete'
+
+    # Handle PM2 process management
+    if pm2 describe HMS-BE > /dev/null; then
+        echo "Restarting existing PM2 process: HMS-BE"
+        pm2 restart HMS-BE
+    else
+        echo "Starting new PM2 process: HMS-BE"
+        pm2 start dist/main.js --name HMS-BE
+    fi
 fi

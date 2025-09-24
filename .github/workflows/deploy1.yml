@@ -1,21 +1,140 @@
-name: CI/CD deployment
- 
+name: HMS BACKEND CI/CD Deployment
+
 on:
   push:
     branches:
- 
-      - dev  # Run when pushed to the 'dev' branch
- 
+      - docker-complete
+      # - localDev
+      # - cloudDev
+      # - test
+      # - uat
+      # - demo
+      # - prod
+
 jobs:
   deploy:
-    runs-on: [self-hosted, ophub-backend-dev-runner]  # Specify to run on a self-hosted runner
- 
+    runs-on: [self-hosted, hms-be-localDev-runner]
+
     steps:
-      - name: Run Deployment Commands
+      # Step 1: Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set environment-specific deployment configurations
+      - name: Set environment variables
+        id: set_vars
         run: |
-          cd /var/www/op-hub-backend
-          sudo git stash
-          sudo git pull
-          sudo npm install
- 
-          sudo pm2 restart 0
+
+          if [[ "$GITHUB_REF" == "refs/heads/localDev" ]]; then
+            export DEPLOYMENT_TARGET="local"
+            echo "Deploying to local server"
+          elif [[ "$GITHUB_REF" == "refs/heads/docker-complete" ]]; then
+            export DEPLOYMENT_TARGET="cloud"
+            export GROUP_NAME="hms-docker"
+            echo "Deploying to AWS (DEV environment)"
+
+          else
+            echo "No matching environment for branch $GITHUB_REF"
+            exit 1
+          fi
+
+          echo "target=$DEPLOYMENT_TARGET" >> $GITHUB_ENV
+          echo "group=$GROUP_NAME" >> $GITHUB_ENV
+
+      # Step 3: Deploy to Local Server (only for local-dev branch)
+      - name: Deploy to Local Server
+        if: env.target == 'local'
+        run: |
+
+
+
+          # Clean up and deploy the new build
+          sudo rm -rf /var/www/hms-backend/*
+
+          echo "Cleaned previous build"
+          sudo cp -r $GITHUB_WORKSPACE/* /var/www/hms-backend/          
+
+          echo "Starting NPM Install..."
+          cd /var/www/hms-backend/
+          sudo npm install || { echo "npm install failed"; exit 1; }
+          echo "NPM install completed successfully"
+
+
+          sudo cp ~/env/.env.hms-be /var/www/hms-backend/.env
+          echo "Copied .env file"
+
+          # Run the build process
+          sudo npm run build || { echo "Build failed"; exit 1; }
+          echo "Build completed successfully"
+
+
+          #cd /var/www/hms-backend/
+          sudo pm2 restart HMS-BE
+
+      # # performing SonarQube scan
+
+      # - name: SonarQube Scan
+      #   if: env.group == 'cloudDev-group'
+      #   uses: SonarSource/sonarqube-scan-action@v5
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #     SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      # Step 4: Deploy to AWS CodeDeploy
+      - name: Configure AWS Credentials
+        if: env.target == 'cloud'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+
+      - name: Create CodeDeploy Deployment
+        if: env.target == 'cloud'
+        run: |
+          echo "Deploying to AWS CodeDeploy (Application: TRANS-demo, Group: ${{ env.group }})"
+          aws deploy create-deployment \
+             --application-name TRANS-demo \
+             --deployment-group-name ${{ env.group }} \
+             --deployment-config-name CodeDeployDefault.AllAtOnce \
+             --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
+           echo "AWS CodeDeploy deployment complete."
+  # Docker-image:
+  #   needs: deploy
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: Checkout source
+  #       uses: actions/checkout@v4
+
+  #     - name: Configure AWS Credentials
+
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: ap-south-1
+
+  #     - name: Login to Amazon ECR
+  #       id: login-ecr
+  #       uses: aws-actions/amazon-ecr-login@v2
+
+  #     - name: Set short SHA
+  #       id: vars
+  #       run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+  #     - name: Build, Tag, and Push Docker image
+  #       env:
+  #         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+  #         ECR_REPOSITORY: hms-be
+  #         IMAGE_TAG: ${{ github.ref_name }}-${{ env.SHORT_SHA }}
+
+  #       run: |
+  #         docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
+  #         docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+  #         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+
+  #         # push latest tag
+  #         docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+  #         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
