@@ -45,7 +45,7 @@ jobs:
       - name: Deploy to Local Server
         if: env.target == 'local'
         run: |
-
+          BRANCH_NAME=${GITHUB_REF##*/}
 
 
           # Clean up and deploy the new build
