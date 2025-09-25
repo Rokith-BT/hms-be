@@ -2,7 +2,7 @@ version: 0.0
 os: linux
 files:
   - source: /
-    destination: /var/www/phr-be/
+    destination: /var/www/hms-be/
     overwrite: true
 hooks:
   ApplicationStart:

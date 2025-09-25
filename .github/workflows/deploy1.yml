@@ -31,6 +31,7 @@ jobs:
           elif [[ "$GITHUB_REF" == "refs/heads/docker-complete" ]]; then
             export DEPLOYMENT_TARGET="cloud"
             export GROUP_NAME="hms-docker"
+            echo "${GITHUB_REF##*/}" > BRANCH_NAME.txt
             echo "Deploying to AWS (DEV environment)"
 
           else
@@ -44,12 +45,11 @@ jobs:
           echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
           echo "BRANCH_NAME=${BRANCH_NAME}"
 
+
       # Step 3: Deploy to Local Server (only for local-dev branch)
       - name: Deploy to Local Server
         if: env.target == 'local'
         run: |
-          BRANCH_NAME=${GITHUB_REF##*/}
-
 
           # Clean up and deploy the new build
           sudo rm -rf /var/www/hms-backend/*
@@ -100,8 +100,7 @@ jobs:
              --application-name TRANS-demo \
              --deployment-group-name ${{ env.group }} \
              --deployment-config-name CodeDeployDefault.AllAtOnce \
-             --github-location repository=${{ github.repository }},commitId=${{ github.sha }} \
-            --environment-variables BRANCH_NAME=$BRANCH_NAME
+             --github-location repository=${{ github.repository }},commitId=${{ github.sha }} 
            echo "AWS CodeDeploy deployment complete."
   # Docker-image:
   #   needs: deploy
