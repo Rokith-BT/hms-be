@@ -3,15 +3,23 @@
 # Fetch the branch name passed from GitHub Actions (this should be passed during deployment)
 BRANCH_NAME=${BRANCH_NAME:-"undefined"}
 
-echo "Branch Name from GitHub Actions: $BRANCH_NAME"
+BRANCH_NAME=$(cat /var/www/hms-backend/BRANCH_NAME.txt)
+echo "Deploying branch: $BRANCH_NAME"
 
-cd /var/www/hms-backend/
+# Docker-based deployment
+if [[ "$BRANCH_NAME" == "docker-complete" ]]; then
+  echo "Running Docker-based deployment..."
 
-# Check if the branch is 'docker-complete'
-if [ "$BRANCH_NAME" == "docker-complete" ]; then
-    echo "Deploying using Docker Compose for docker-complete branch"
-    docker-compose down -v  # Clean up any existing containers/volumes
-    docker-compose up --build -d  # Build and start Docker containers
+  cd /var/www/hms-backend/
+
+  # Optional: stop and remove existing containers
+  docker-compose down || true
+
+  # Build and start containers
+  docker-compose up -d --build
+
+  echo "Docker deployment complete."
+
 else
     echo "Running normal deployment for branch $BRANCH_NAME"
 
